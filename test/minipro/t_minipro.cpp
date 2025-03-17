@@ -33,14 +33,27 @@ void signal_handler(int signum)
   should_exit = true;
 }
 
+inline int sign(int a) { return a > 0 ? 1 : -1; }
+
+//
+// See https://github.com/slgrobotics/robots_bringup/tree/main/Docs/miniPRO
+//
+
 int main(int, char **)
 {
+  // put your miniPRO address here (use "bt-device -l"):
+  const char* bt_addr = "F4:02:07:C6:C7:B4";
+
   try {
     signal(SIGINT, signal_handler);
 
-    MiniPro minipro("F4:02:07:C6:C7:B4");
+    std::cout << "MiniPro: " << bt_addr << " trying to connect..." << std::endl;
+
+    MiniPro minipro(bt_addr); // <- connection happens here
     minipro.enable_notifications();
     minipro.enter_remote_control_mode();
+
+    std::cout << "MiniPro: connected" << std::endl;
 
     XBox360Controller joystick;
     LoopRate loop_rate(30_Hz);
@@ -49,14 +62,29 @@ int main(int, char **)
       // Flip the axis values so that forward and right are positive values
       // so that the direction of the MiniPRO matches the joysticks
       auto throttle = -joystick.get_axis_state(XBox360Controller::Axis_LeftThumbstick).y;
-      auto steering = -joystick.get_axis_state(XBox360Controller::Axis_RightThumbstick).x;
+      auto steering = -joystick.get_axis_state(XBox360Controller::Axis_LeftThumbstick).x;
 
       // Set values to zero if below a specified threshold so that the MiniPRO
       // is stable when the joysticks are released (and wouldn't otherwise go
       // all the way back to 0). 4000 seems to work pretty well for my joystick
-      const int zero_threshold = 4000;
-      if (abs(throttle) < zero_threshold) {throttle = 0;}
-      if (abs(steering) < zero_threshold) {steering = 0;}
+      const int zero_threshold_x = 8000;
+      const int zero_threshold_y = 8000;
+      if (abs(throttle) < zero_threshold_x) 
+      {
+        throttle = 0;
+      } else {
+        throttle = (abs(throttle) - zero_threshold_x) * sign(throttle);
+      }
+
+      if (abs(steering) < zero_threshold_y)
+      {
+        steering = 0;
+      } else {
+        steering = (abs(steering) - zero_threshold_y) * sign(steering);
+        steering /= 10.0;  // less aggressive on turns
+      }
+
+      //std::cout << "throttle: " << throttle << "   steering: " << steering << std::endl;
 
       // Keep the MiniPRO fed with drive commands, throttling to achieve a
       // consistent rate. I need to empirically determine the minimum rate
