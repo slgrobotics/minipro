@@ -112,14 +112,40 @@ Joystick::input_thread_func()
 
         case JS_EVENT_AXIS:
           {
-            // Each axis has two event numbers (for x and y)
-            size_t axis = event.number / 2;
+            //printf("Event number %u\n", event.number);
 
-            // The first event number is x and the second is y
-            if (event.number % 2 == 0) {
-              axis_map_[axis].x = event.value;
-            } else {
-              axis_map_[axis].y = event.value;
+            // 0, 1 = Axis_LeftThumbstick x,y
+            // 2    = Axis_Trigger - Left
+            // 3, 4 = Axis_RightThumbstick x,y
+            // 5    = Axis_Trigger - Right
+            // 6, 7 = Axis_Digipad x,y
+
+            switch(event.number)
+            {
+              case 0:
+                axis_map_[0].x = event.value; // XBox360Controller::Axis_LeftThumbstick
+                break;
+              case 1:
+                axis_map_[0].y = event.value;
+                break;
+              case 2:
+                axis_map_[2].x = event.value; // Axis_Trigger
+                break;
+              case 3:
+                axis_map_[1].x = event.value; // XBox360Controller::Axis_RightThumbstick
+                break;
+              case 4:
+                axis_map_[1].y = event.value;
+                break;
+              case 5:
+                axis_map_[2].y = event.value; // Axis_Trigger
+                break;
+              case 6:
+                axis_map_[3].x = event.value; // Axis_Digipad
+                break;
+              case 7:
+                axis_map_[3].y = event.value;
+                break;
             }
           }
           break;
