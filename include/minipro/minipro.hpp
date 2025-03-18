@@ -44,6 +44,8 @@ public:
   void drive(int16_t throttle, int16_t steering);
   void exit_remote_control_mode();
 
+  bool receive_packet();
+
 protected:
   void send_packet(packet::Packet & packet);
   void write_config_value(uint16_t value);

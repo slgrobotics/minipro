@@ -47,13 +47,13 @@ int main(int, char **)
   try {
     signal(SIGINT, signal_handler);
 
-    std::cout << "MiniPro: " << bt_addr << " trying to connect..." << std::endl;
+    std::cout << "IP: MiniPro: " << bt_addr << " trying to connect..." << std::endl;
 
     MiniPro minipro(bt_addr); // <- connection happens here
     minipro.enable_notifications();
     minipro.enter_remote_control_mode();
 
-    std::cout << "MiniPro: connected" << std::endl;
+    std::cout << "OK: MiniPro: connected" << std::endl;
 
     XBox360Controller joystick;
     LoopRate loop_rate(30_Hz);
@@ -89,6 +89,11 @@ int main(int, char **)
       // Keep the MiniPRO fed with drive commands, throttling to achieve a
       // consistent rate. I need to empirically determine the minimum rate
       minipro.drive(throttle, steering);
+
+      //std::cout << "IP: reading..." << std::endl;
+      minipro.receive_packet();
+      //std::cout << "OK: read" << std::endl;
+
       loop_rate.sleep();
     }
 

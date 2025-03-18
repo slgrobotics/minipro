@@ -100,6 +100,19 @@ MiniPro::send_packet(packet::Packet & packet)
   write_value(tx_service_handle_, bytes.data(), bytes.size(), true);
 }
 
+bool
+MiniPro::receive_packet()
+{
+  read_value(tx_service_handle_);  // LEClient::read_cb() prints: "Read value (12 bytes): 55 aa 06 0a 03 7b 00 00 ac 09 bc fe"
+
+  read_value(config_service_handle_); //LEClient::read_cb() prints: "Read value (2 bytes): 00 01"
+
+  //uint16_t handles[] {tx_service_handle_, config_service_handle_};
+  //read_multiple(handles, 2); // this fails:  "Read multiple request failed: 0x06"
+
+  return true;
+}
+
 void
 MiniPro::write_config_value(uint16_t value)
 {
